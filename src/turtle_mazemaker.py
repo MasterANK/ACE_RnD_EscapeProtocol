@@ -52,18 +52,6 @@ goal_marker.goto(goal_pos)
 goal_marker.color("green")
 goal_marker.dot(20)
 
-start_marker = turtle.RawTurtle(screen)
-start_marker.shape("circle")
-start_marker.color("green")
-start_marker.penup()
-start_marker.shapesize(0.8)
-
-end_marker = turtle.RawTurtle(screen)
-end_marker.shape("circle")
-end_marker.color("red")
-end_marker.penup()
-end_marker.shapesize(0.8)
-
 # --- UI Elements ---
 maze_name_label = tk.Label(frame_left, text="Maze Name:")
 maze_name_label.pack()
@@ -196,22 +184,6 @@ def save_maze():
 
 save_button = tk.Button(frame_left, text="Save Maze", command=save_maze)
 save_button.pack(pady=10)
-
-def set_start_point():
-    global selected_point
-    selected_point = "start"
-    status_label.config(text="🟢 Click anywhere to set/move the Start point")
-
-def set_end_point():
-    global selected_point
-    selected_point = "end"
-    status_label.config(text="🔴 Click anywhere to set/move the End point")
-
-start_button = tk.Button(frame_left, text="Set Start Point", command=set_start_point)
-start_button.pack(pady=5)
-
-end_button = tk.Button(frame_left, text="Set End Point", command=set_end_point)
-end_button.pack(pady=5)
 
 screen.update()
 root.mainloop()
