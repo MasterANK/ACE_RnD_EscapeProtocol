@@ -29,7 +29,9 @@ preview_turtle.color("gray")
 
 walls = []
 clicks = []
-selected_point = None
+start_pos = [None, None]
+end_pos = [None, None]
+selected_point = None  # Can be "start", "end", or None
 line_mode = tk.StringVar(value="straight")  # Default mode
 
 start_pos = (-180, 180)
@@ -186,7 +188,7 @@ def save_maze():
         "goal": goal_pos,
     }
 
-    filename = f"{name}.json"
+    filename = f"mazes/{name}.json"
     with open(filename, "w") as f:
         json.dump(maze_data, f, indent=2)
 
@@ -194,6 +196,22 @@ def save_maze():
 
 save_button = tk.Button(frame_left, text="Save Maze", command=save_maze)
 save_button.pack(pady=10)
+
+def set_start_point():
+    global selected_point
+    selected_point = "start"
+    status_label.config(text="🟢 Click anywhere to set/move the Start point")
+
+def set_end_point():
+    global selected_point
+    selected_point = "end"
+    status_label.config(text="🔴 Click anywhere to set/move the End point")
+
+start_button = tk.Button(frame_left, text="Set Start Point", command=set_start_point)
+start_button.pack(pady=5)
+
+end_button = tk.Button(frame_left, text="Set End Point", command=set_end_point)
+end_button.pack(pady=5)
 
 screen.update()
 root.mainloop()
