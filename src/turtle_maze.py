@@ -4,7 +4,7 @@ import time
 import json
 import math
 
-filename = r"src/mazes/logo.json"
+filename = r"src/mazes/maze1.json"
 
 # --- Main Tkinter window ---
 root = tk.Tk()
@@ -120,6 +120,11 @@ text_box.pack()
 status_label = tk.Label(frame_left, text="Status: Ready")
 status_label.pack()
 
+# --- Scoring variables ---
+move_count = 0
+total_distance = 0.0
+start_time = time.time()
+
 def run_commands():
     # Reset player to start each run
     player.clear()
@@ -130,14 +135,20 @@ def run_commands():
     screen.update()
 
     commands = text_box.get("1.0", tk.END).strip().splitlines()
+
+    move_count = 0
+    total_distance = 0
+
     for cmd in commands:
         parts = cmd.strip().split()
         if not parts:
             continue
         action = parts[0].upper()
+        move_count += 1
         if action == "MOVE" and len(parts) == 2:
             try:
                 dist = int(parts[1])
+                total_distance += dist
                 step = 5
                 for _ in range(abs(dist)//step):
                     player.forward(step if dist > 0 else -step)
@@ -148,7 +159,11 @@ def run_commands():
                         status_label.config(text="💥 Hit a wall!")
                         return
                     if player.distance(goal_pos) < 15:
-                        status_label.config(text="🎉 Goal Reached!")
+                        end_time = time.time()
+                        elapsed = end_time - start_time
+                        score = (elapsed * 0.5) + (move_count * 2) + (total_distance * 0.1)
+                        status_label.config(text=f"🎉 Goal Reached! ,\n \
+                                             ⏱ Time: {elapsed:.2f}s\n🚶 Moves: {move_count}\n📏 Distance: {int(total_distance)}\n🏆 Score: {score:.2f}")
                         return
             except:
                 pass
