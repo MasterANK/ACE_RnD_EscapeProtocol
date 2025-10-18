@@ -3,6 +3,7 @@ import tkinter as tk
 import time
 import json
 import math
+import tkinter.messagebox as msg
 
 filename = r"src/mazes/maze1.json"
 
@@ -196,5 +197,79 @@ coord_label = tk.Label(frame_left, text="🖱️ Mouse: (0, 0)")
 coord_label.pack(pady=5)
 
 canvas.bind("<Motion>", show_mouse_position)
+
+#INSTRUCTION PANEL
+def show_instructions():
+    instructions = """
+📘 **MAZE SOLVER INSTRUCTIONS**
+
+Welcome to the Maze Solver challenge! 🧩  
+Your goal is to **navigate the blue turtle 🐢** from the **start point** to the **green goal 🟢**
+using text-based movement commands — without hitting any walls.
+
+───────────────────────────────
+🧭 **COMMANDS**
+───────────────────────────────
+➡️  MOVE <distance>  
+  Moves the turtle forward by the given number of pixels.
+
+↩️  ROTATE <angle>  
+  Rotates the turtle clockwise by the given number of degrees.
+
+───────────────────────────────
+💻 **EXAMPLES**
+───────────────────────────────
+MOVE 100  
+ROTATE 90  
+MOVE 50  
+ROTATE 45  
+MOVE 70  
+
+Tip 🪄:  
+You can use multiple lines — one command per line!
+
+───────────────────────────────
+🎯 **GOAL**
+───────────────────────────────
+✅ Reach the green circle without touching any walls.  
+💥 Colliding with a wall ends your attempt.  
+🏁 The faster you reach the goal with fewer moves and less distance, the higher your score!
+
+───────────────────────────────
+🕹️ **SCORING SYSTEM**
+───────────────────────────────
+🏆 Final Score is calculated from:
+- ⏱️ Time taken  
+- 🚶 Number of moves (commands)  
+- 📏 Total distance traveled  
+
+Higher scores = better performance!
+
+───────────────────────────────
+💡 **HINTS**
+───────────────────────────────
+- Try smaller moves for precision.
+- Use right angles (90°) for sharp turns.
+- Plan your path before executing commands.
+
+Good luck, maze solver! 🎉
+"""
+    # Use a Toplevel window for better formatting than simple messagebox
+    help_window = tk.Toplevel()
+    help_window.title("📘 Maze Solver Instructions")
+    help_window.geometry("500x600")
+    help_window.resizable(False, True)
+
+    text_widget = tk.Text(help_window, wrap="word", font=("Consolas", 11), bg="#f8f9fa")
+    text_widget.insert("1.0", instructions)
+    text_widget.config(state="disabled")
+    text_widget.pack(expand=True, fill="both", padx=10, pady=10)
+
+    scrollbar = tk.Scrollbar(help_window, command=text_widget.yview)
+    scrollbar.pack(side="right", fill="y")
+    text_widget.config(yscrollcommand=scrollbar.set)
+
+help_button = tk.Button(frame_left, text="❓ Help / Instructions", command=show_instructions)
+help_button.pack(pady=5)
 
 root.mainloop()
