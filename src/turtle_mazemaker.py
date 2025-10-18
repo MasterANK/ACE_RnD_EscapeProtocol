@@ -1,7 +1,7 @@
 import turtle
 import tkinter as tk
 import json
-import math
+import os
 
 # --- Tkinter Setup ---
 root = tk.Tk()
@@ -163,7 +163,7 @@ undo_button = tk.Button(frame_left, text="Undo Last Wall", command=undo_last_wal
 undo_button.pack(pady=5)
 
 def save_maze():
-    """Save maze data as JSON."""
+    """Save maze data as JSON. (FIXED)"""
     name = maze_name_entry.get().strip()
     if not name:
         status_label.config(text="⚠️ Please enter a maze name before saving.")
@@ -176,11 +176,22 @@ def save_maze():
         "goal": goal_pos,
     }
 
-    filename = f"mazes/{name}.json"
-    with open(filename, "w") as f:
-        json.dump(maze_data, f, indent=2)
+    # --- FIX APPLIED HERE ---
+    dir_name = "src/mazes"
+    filename = os.path.join(dir_name, f"{name}.json")
+    
+    try:
+        # 1. Create the 'mazes' directory if it does not exist
+        os.makedirs(dir_name, exist_ok=True) 
 
-    status_label.config(text=f"✅ Maze saved to {filename}")
+        # 2. Save the data
+        with open(filename, "w") as f:
+            json.dump(maze_data, f, indent=2)
+
+        status_label.config(text=f"✅ Maze successfully saved to {filename}")
+    except Exception as e:
+        # Provide feedback if any file error occurs
+        status_label.config(text=f"❌ Error saving maze: {e}")
 
 save_button = tk.Button(frame_left, text="Save Maze", command=save_maze)
 save_button.pack(pady=10)

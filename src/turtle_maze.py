@@ -2,8 +2,9 @@ import turtle
 import tkinter as tk
 import time
 import json
+import math
 
-filename = r"maze.json"
+filename = r"src/mazes/logo.json"
 
 # --- Main Tkinter window ---
 root = tk.Tk()
@@ -47,7 +48,6 @@ def build_maze():
     return data["walls"], tuple(data["start"]), tuple(data["goal"])
 
 walls, start_pos, goal_pos = build_maze()
-print(walls)
 
 for wall in walls:
     draw_wall(wall[0],wall[1],wall[2],wall[3])
@@ -72,13 +72,42 @@ screen.update()
 
 # --- Collision Detection ---
 def is_collision(x, y):
-    for (x1, y1, x2, y2) in walls:
-        if x1 == x2:  # vertical wall
-            if abs(x - x1) < 5 and min(y1, y2) <= y <= max(y1, y2):
+    """
+    Checks for collision against any wall (horizontal, vertical, or slant) 
+    by calculating the distance from the player point (x, y) to the wall segment.
+    """
+    # Player radius or collision buffer
+    THRESHOLD = 5 
+
+    for x1, y1, x2, y2 in walls:
+        dx = x2 - x1
+        dy = y2 - y1
+        len_sq = dx*dx + dy*dy
+
+        # If the segment is a point (shouldn't happen), check point distance
+        if len_sq == 0:
+            if math.hypot(x - x1, y - y1) < THRESHOLD:
                 return True
-        if y1 == y2:  # horizontal wall
-            if abs(y - y1) < 5 and min(x1, x2) <= x <= max(x1, x2):
-                return True
+            continue
+
+        # Calculate t: The projection factor of vector AP onto vector AB
+        # P = (x, y), A = (x1, y1), B = (x2, y2)
+        # t = ((P - A) . (B - A)) / |B - A|^2
+        t = ((x - x1) * dx + (y - y1) * dy) / len_sq
+
+        # Clamp t to the [0, 1] range to ensure the closest point is on the segment
+        t = max(0, min(1, t))
+
+        # Closest point on the segment (closest_x, closest_y)
+        closest_x = x1 + t * dx
+        closest_y = y1 + t * dy
+
+        # Calculate distance from player (x, y) to the closest point on the wall
+        distance = math.hypot(x - closest_x, y - closest_y)
+
+        if distance < THRESHOLD:
+            return True
+            
     return False
 
 # --- Tkinter Controls ---
@@ -93,7 +122,10 @@ status_label.pack()
 
 def run_commands():
     # Reset player to start each run
+    player.clear()
+    player.penup()
     player.goto(start_pos)
+    player.pendown()
     player.setheading(0)
     screen.update()
 
@@ -132,5 +164,22 @@ def run_commands():
 
 run_button = tk.Button(frame_left, text="Run", command=run_commands)
 run_button.pack(pady=5)
+
+def show_mouse_position(event):
+    canvas_width = screen.window_width()
+    canvas_height = screen.window_height()
+
+    # Convert tkinter canvas coords (top-left origin)
+    # to turtle coords (center origin, y increasing upward)
+    x = event.x - canvas_width / 2
+    y = canvas_height / 2 - event.y
+
+    coord_label.config(text=f"🖱️ Mouse: ({int(x)}, {int(y)})")
+
+
+coord_label = tk.Label(frame_left, text="🖱️ Mouse: (0, 0)")
+coord_label.pack(pady=5)
+
+canvas.bind("<Motion>", show_mouse_position)
 
 root.mainloop()
