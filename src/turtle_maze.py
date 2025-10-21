@@ -5,7 +5,7 @@ import json
 import math
 import tkinter.messagebox as msg
 
-filename = r"src/mazes/maze1.json"
+filename = r"src/mazes/TEST.json"
 
 # --- Main Tkinter window ---
 root = tk.Tk()
