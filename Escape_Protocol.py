@@ -272,13 +272,13 @@ using text-based commands.
 🧭 COMMANDS
 ───────────────────────────────
 ➡️  MOVE <distance>  
-↩️  ROTATE <angle>  
+↩️  TURN <angle>  
 
 ───────────────────────────────
 💻 EXAMPLES
 ───────────────────────────────
 MOVE 100  
-ROTATE 90  
+TURN 90  
 MOVE 50  
 
 ───────────────────────────────
