@@ -33,62 +33,105 @@ except Exception as e:
 app = Flask(__name__)
 
 # --- API Endpoints ---
-
 @app.route("/submit_score", methods=["POST"])
 def submit_score():
+    """
+    Receives individual maze metrics, securely updates the user's total 
+    score, moves, distance, and time on the server.
+    
+    The expected payload structure includes a detailed 'maze_scores' list:
+    "maze_scores": {"Maze Name": [score, moves, distance, time_elapsed]}
+    """
     if not db:
         return jsonify({"error": "Server not connected to Database."}), 503
 
     try:
         data = request.json
         username = data.get("username", "").strip()
+        
+        # 1. New Maze Performance Metrics from Client (Per-Maze Data - used for secure aggregation)
+        # The aggregation relies ONLY on these top-level fields for correctness.
         score = data.get("score")
-        maze_scores = data.get("maze_scores", {})
-    except Exception:
-        return jsonify({"error": "Invalid JSON format."}), 400
+        moves = data.get("moves", 0)
+        distance = data.get("distance", 0.0)
+        time_elapsed = data.get("time_elapsed", 0.0)
+        
+        # 2. Per-Maze Detail (used only for storage/tracking completion)
+        # This dict now contains the list: {maze_name: [score, move_count, total_distance, elapsed]}
+        maze_scores = data.get("maze_scores", {}) 
+
+        # Convert and validate metrics
+        moves_int = int(moves) if moves is not None else 0
+        distance_float = float(distance) if distance is not None else 0.0
+        time_float = float(time_elapsed) if time_elapsed is not None else 0.0
+        score_float = float(score)
+
+    except (ValueError, TypeError) as e:
+        print(f"Validation Error: {e}", file=sys.stderr)
+        return jsonify({"error": "Invalid data format or type received. Check all six fields."}), 400
 
     if not username or score is None:
         return jsonify({"error": "Missing username or score"}), 400
 
-    # Basic score validation
-    try:
-        score_float = float(score)
-        if score_float < 0:
-            return jsonify({"error": "Score cannot be negative."}), 400
-    except ValueError:
-        return jsonify({"error": "Score must be a valid number."}), 400
-
-    # Use the username as the document ID for easy retrieval/updating
     user_ref = db.collection("leaderboard").document(username) 
     
-    # Use a transaction to ensure atomic read/write if necessary, but 
-    # for simple updates, a direct get/set is acceptable here.
-    user_data = user_ref.get().to_dict() or {"total": 0, "mazes": {}}
+    # Initialize all total fields safely with 0 if user is new
+    user_data = user_ref.get().to_dict() or {
+        "total": 0.0, 
+        "mazes": {}, 
+        "total_moves": 0,          
+        "total_distance": 0.0,     
+        "total_time": 0.0          
+    }
 
-    # Your logic: Update/add scores
-    user_data["total"] = user_data["total"] + score_float # Accumulate total score
-    user_data["mazes"].update(maze_scores)              # Update maze progress
-    user_data["last_updated"] = firestore.SERVER_TIMESTAMP # Use server timestamp for accuracy
+    # CORE LOGIC: Accumulate all four metrics securely on the server
     
-    user_ref.set(user_data) # Overwrites existing document with new data
+    # 1. Score Accumulation (Relies on top-level 'score' for the correct increment)
+    user_data["total"] = user_data["total"] + score_float
+    
+    # 2. Metric Accumulation (Relies on top-level metrics for the correct increment)
+    user_data["total_moves"] = user_data.get("total_moves", 0) + moves_int
+    user_data["total_distance"] = user_data.get("total_distance", 0.0) + distance_float
+    user_data["total_time"] = user_data.get("total_time", 0.0) + time_float
+    
+    # 3. Maze Completion Tracking (Stores the new detailed list structure, which is acceptable in Firestore)
+    user_data["mazes"].update(maze_scores)
+    user_data["last_updated"] = firestore.SERVER_TIMESTAMP 
+    
+    user_ref.set(user_data) 
 
-    return jsonify({"message": "Score updated", "user_total": user_data["total"]}), 200
+    return jsonify({
+        "message": "Score and all metrics updated", 
+        "user_total": user_data["total"],
+        "total_moves": user_data["total_moves"] 
+    }), 200
 
 
 @app.route("/leaderboard", methods=["GET"])
 def leaderboard():
+    """
+    Retrieves and returns the aggregated leaderboard data, sorted by total score.
+    """
     if not db:
         return jsonify({"error": "Server not connected to Database."}), 503
         
     try:
-        # Sort by 'total' score in descending order
-        # Note: If you want real-time sorting, you might need a composite index on Firestore
-        # but for small data sets, stream and sort is fast enough.
+        # Sort by total score descending
         docs = db.collection("leaderboard").order_by("total", direction=firestore.Query.DESCENDING).stream()
         
-        leaderboard_data = [
-            {"username": doc.id, **doc.to_dict()} for doc in docs
-        ]
+        leaderboard_data = []
+        for doc in docs:
+            data = doc.to_dict()
+            # Compile data for the Streamlit app
+            leaderboard_data.append({
+                "username": doc.id,
+                "total": data.get("total", 0.0),
+                "total_moves": data.get("total_moves", 0),
+                "total_distance": data.get("total_distance", 0.0),
+                "total_time": data.get("total_time", 0.0),
+                # Calculate number of completed mazes from the 'mazes' map
+                "mazes_completed": len(data.get("mazes", {}))
+            })
 
         return jsonify(leaderboard_data), 200
     except Exception as e:
@@ -97,6 +140,6 @@ def leaderboard():
 
 
 if __name__ == "__main__":
-    # Render uses the PORT environment variable provided by the host.
+    # Use environment variable for port or default to 8080
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)

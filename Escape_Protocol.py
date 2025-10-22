@@ -4,7 +4,11 @@ import time
 import json
 import math
 import tkinter.messagebox as msg
+import tkinter.simpledialog as simpledialog
+import requests
 
+API_URL = "https://ace-rnd-escapeprotocol.onrender.com/submit_score"
+PLAYER_USERNAME = ""
 # ------------------ CONFIG ------------------
 maze_files = [
     r"src/mazes/test.json",
@@ -74,6 +78,33 @@ maze_name = ""
 total_moves_all = 0
 total_distance_all = 0.0
 total_score_all = 0.0
+
+def get_username():
+    global PLAYER_USERNAME
+    
+    # Check if a username has been set, otherwise prompt the user
+    if not PLAYER_USERNAME:
+        username = simpledialog.askstring("Username", "Enter your unique competition username:")
+        if username:
+            PLAYER_USERNAME = username.strip()
+            # Update the UI element to show the player who they are
+            status_label.config(text=f"Welcome, {PLAYER_USERNAME}!\nStatus: Ready")
+        else:
+            # Handle cancel or no input
+            PLAYER_USERNAME = "Anonymous"
+            status_label.config(text="Status: Ready (Anonymous Player)")
+
+# --- Send Users Score ---
+def send_score(username, score, maze_scores, moves, distance):
+    data = {
+        "username": username,
+        "score": score,
+        "maze_scores": maze_scores,
+        "moves": moves,
+        "distance": distance,
+    }
+    response = requests.post(API_URL, json=data)
+    print(response.json())
 
 # --- Border Color SET ---
 def set_border_color(color):
@@ -221,6 +252,25 @@ def run_commands():
                             text=f"⏱ Prev. Maze Time: {elapsed:.2f}s\n🚶 Moves: {total_moves_all}\n📏 Distance: {int(total_distance_all)}\n🏆 Score: {total_score_all:.2f}"
                         )
                         screen.update()
+                        if PLAYER_USERNAME == "" or PLAYER_USERNAME == "Anonymous":
+                            print("Score not submitted: Anonymous player.")
+                            pass 
+                        else:
+                            status_label.config(
+                                text=f"{maze_name} Complete! Uploading score\n"
+                            )
+                            screen.update()
+                            # Submit the total score and the current maze score
+                            send_score(
+                                username=PLAYER_USERNAME, 
+                                score=score, 
+                                maze_scores={maze_name: [score,move_count,total_distance,elapsed]},
+                                moves=move_count,        # Pass the move count for this single maze
+                                distance=total_distance, # Pass the distance for this single maze
+                            )
+                            status_label.config(
+                                text=f"{maze_name} Complete! Uploaded\n"
+                            )
                         if current_maze_index == len(maze_files) - 1:
                             # final maze — show final scores after a short pause so user can read
                             root.after(1500, show_final_scores)
@@ -305,6 +355,8 @@ MOVE 50
 
 help_button = tk.Button(frame_left, text="❓ Help / Instructions", command=show_instructions)
 help_button.pack(pady=5)
+
+get_username()
 
 # Build first maze and start timer
 build_maze(maze_files[current_maze_index])

@@ -4,6 +4,8 @@ from firebase_admin import credentials, firestore
 from datetime import datetime
 import pandas as pd
 
+#RUN : streamlit run src/leaderboard/main.py
+
 # --- Firebase Setup ---
 # When deploying on Streamlit Cloud, use st.secrets instead of local file
 if not firebase_admin._apps:
