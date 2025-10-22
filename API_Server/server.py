@@ -130,7 +130,8 @@ def leaderboard():
                 "total_distance": data.get("total_distance", 0.0),
                 "total_time": data.get("total_time", 0.0),
                 # Calculate number of completed mazes from the 'mazes' map
-                "mazes_completed": len(data.get("mazes", {}))
+                "mazes_completed": len(data.get("mazes", {})),
+                "mazes" : data.get("mazes", {})
             })
 
         return jsonify(leaderboard_data), 200
