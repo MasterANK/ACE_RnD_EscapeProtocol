@@ -5,7 +5,7 @@ import json
 import math
 import tkinter.messagebox as msg
 
-filename = r"src/mazes/Birb.json"
+filename = r"src/mazes/Polygon.json"
 
 # --- Main Tkinter window ---
 root = tk.Tk()
@@ -168,7 +168,7 @@ def run_commands():
                         return
             except:
                 pass
-        elif action == "ROTATE" and len(parts) == 2:
+        elif action == "TURN" and len(parts) == 2:
             try:
                 angle = int(parts[1])
                 player.right(angle)

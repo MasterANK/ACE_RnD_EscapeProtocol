@@ -11,9 +11,10 @@ API_URL = "https://ace-rnd-escapeprotocol.onrender.com/submit_score"
 PLAYER_USERNAME = ""
 # ------------------ CONFIG ------------------
 maze_files = [
+    r"src/mazes/Polygon.json",
     r"src/mazes/test.json",
     r"src/mazes/maze1.json",
-    r"src/mazes/logo.json"
+    r"src/mazes/logo.json",
 ]
 current_maze_index = 0
 scores = {}
