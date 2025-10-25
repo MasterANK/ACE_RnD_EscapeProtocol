@@ -8,13 +8,12 @@ import time
 
 
 # --- Configuration ---
-st.set_page_config(layout="wide", page_title="Maze Runner Leaderboard")
+st.set_page_config(layout="wide", page_title="Escape Protocol")
 
 # NOTE: Replace with your actual deployed Render URL
 API_URL = r"https://ace-rnd-escapeprotocol.onrender.com/leaderboard" 
 
 # --- Data Fetching ---
-
 @st.cache_data(ttl=5)
 def fetch_leaderboard():
     """Fetches the aggregated leaderboard data from the Flask API."""
@@ -53,7 +52,7 @@ def fetch_leaderboard():
 
 def display_overall_leaderboard(df):
     """Displays the main leaderboard ranked by Total Score."""
-    st.header("🏆 Global Leaderboard (Aggregated)")
+    st.header("🏆 Global Leaderboard")
     st.caption("Ranked by Total Score across all mazes.")
     
     display_df = df.copy().drop(columns=['mazes', 'Total Time (s)'])
@@ -183,8 +182,8 @@ def display_user_history(df):
 
 # --- Main App Execution ---
 
-st.title("🐍 Command-Line Maze Runner")
-st.markdown("Monitor performance and rankings for all players across all mazes.")
+st.title("Escape Protocol")
+st.markdown("Good Luck Coding")
 
 df, error = fetch_leaderboard()
 
@@ -210,3 +209,4 @@ else:
         display_user_history(df)
 
     st.caption(f"Last updated: {time.strftime('%H:%M:%S', time.localtime())}")
+

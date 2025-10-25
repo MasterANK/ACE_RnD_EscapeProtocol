@@ -150,7 +150,7 @@ def load_next_maze():
         build_maze(maze_files[current_maze_index])
         status_label.config(text=f"Next Maze Loaded! 🧩 Maze {current_maze_index + 1}")
         start_timer()  # start fresh timer for new maze
-    else:
+    else:   
         show_final_scores()
 
 
@@ -237,7 +237,7 @@ def run_commands():
                         return
                     if player.distance(goal_pos) < 15:
                         elapsed = time.time() - start_time
-                        score = max(0, 1000 - (elapsed * 10 + move_count * 5 + total_distance * 0.5))
+                        score = max(0, 1000 - (elapsed * 2 + move_count * 1 + total_distance * 0.1))
                         scores[f"{maze_name}"] = score
                         print(scores)
                         set_border_color("green")
@@ -313,30 +313,57 @@ status_label.pack()
 # --- INSTRUCTION PANEL ---
 def show_instructions():
     instructions = """
-📘 **ESCAPE PROTOCOL INSTRUCTIONS**
+📘 **INSTRUCTIONS**
 
-Your goal is to guide the 🐢 turtle from the start to the 🟢 goal
-using text-based commands.
-
-───────────────────────────────
-🧭 COMMANDS
-───────────────────────────────
-➡️  MOVE <distance>  
-↩️  TURN <angle>  
+Welcome to the Maze Solver challenge! 🧩  
+Your goal is to navigate the blue turtle 🐢from the start point to the green goal 🟢
+using text-based movement commands — without hitting any walls.
 
 ───────────────────────────────
-💻 EXAMPLES
+🧭 **COMMANDS**
 ───────────────────────────────
-MOVE 100  
-TURN 90  
-MOVE 50  
+➡️ MOVE <distance>  
+- Moves the turtle forward by the given number of pixels.
+
+↩️ TURN <angle>  
+- Rotates the turtle clockwise by the given number of degrees.
+- Rotates Anti Clockwise by using negative number of degrees.
 
 ───────────────────────────────
-🎯 GOAL
+💻 **EXAMPLES**
 ───────────────────────────────
-✅ Reach the green circle  
-💥 Avoid walls  
-🏁 Less time, moves, and distance = higher score
+TURN 120
+MOVE 220
+TURN -120
+MOVE 240
+TURN 55
+MOVE 70 
+
+───────────────────────────────
+🎯 **GOAL**
+───────────────────────────────
+✅ Reach the green circle without touching any walls.  
+💥 Colliding with a wall ends your attempt.  
+🏁 The faster you reach the goal with fewer moves and less distance, the higher your score!
+
+───────────────────────────────
+🕹️ **SCORING SYSTEM**
+───────────────────────────────
+🏆 Final Score is calculated from:
+- ⏱️ Time taken  
+- 🚶 Number of moves (commands)  
+- 📏 Total distance traveled  
+
+Higher scores = better performance!
+
+───────────────────────────────
+💡 **HINTS**
+───────────────────────────────
+- Try smaller moves for precision.
+- Use right angles (90°) for sharp turns.
+- Plan your path before executing commands.
+
+Good luck, maze solver! 🎉
 """
     help_window = tk.Toplevel()
     help_window.title("📘 Instructions")
