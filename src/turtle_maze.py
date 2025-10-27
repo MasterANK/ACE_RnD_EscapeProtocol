@@ -5,7 +5,7 @@ import json
 import math
 import tkinter.messagebox as msg
 
-filename = r"src/mazes/Polygon.json"
+filename = r"src/mazes/contrib/chatgptmaze.json"
 
 # --- Main Tkinter window ---
 root = tk.Tk()
@@ -159,10 +159,10 @@ def run_commands():
                         player.backward(step)
                         status_label.config(text="💥 Hit a wall!")
                         return
-                    if player.distance(goal_pos) < 15:
+                    if player.distance(goal_pos) < 20:
                         end_time = time.time()
                         elapsed = end_time - start_time
-                        score = (elapsed * 0.5) + (move_count * 2) + (total_distance * 0.1)
+                        score = max(0, 1000 - (elapsed * 2 + move_count * 1 + total_distance * 0.1))
                         status_label.config(text=f"🎉 Goal Reached! ,\n \
                                              ⏱ Time: {elapsed:.2f}s\n🚶 Moves: {move_count}\n📏 Distance: {int(total_distance)}\n🏆 Score: {score:.2f}")
                         return

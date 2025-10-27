@@ -11,10 +11,10 @@ API_URL = "https://ace-rnd-escapeprotocol.onrender.com/submit_score"
 PLAYER_USERNAME = ""
 # ------------------ CONFIG ------------------
 maze_files = [
-    r"src/mazes/Polygon.json",
     r"src/mazes/test.json",
-    r"src/mazes/maze1.json",
+    r"src/mazes/geminimaze.json",
     r"src/mazes/logo.json",
+    r"src/mazes/chatgptmaze.json",
 ]
 current_maze_index = 0
 scores = {}
@@ -236,7 +236,7 @@ def run_commands():
                         status_label.config(text="💥 Hit a wall! Try again.")
                         set_border_color("red")
                         return
-                    if player.distance(goal_pos) < 15:
+                    if player.distance(goal_pos) < 20:
                         elapsed = time.time() - start_time
                         score = max(0, 1000 - (elapsed * 2 + move_count * 1 + total_distance * 0.1))
                         scores[f"{maze_name}"] = score
