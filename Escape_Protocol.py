@@ -11,10 +11,23 @@ API_URL = "https://ace-rnd-escapeprotocol.onrender.com/submit_score"
 PLAYER_USERNAME = ""
 # ------------------ CONFIG ------------------
 maze_files = [
-    r"src/mazes/test.json",
+    r"src/mazes/MAZENF.json",
+    r"src/mazes/maze2.json",
+    r"src/mazes/ACE.json",
+    r"src/mazes/VIPS.json",
+    r"src/mazes/vscodelogo.json",
+    r"src/mazes/Valo.json",
+    r"src/mazes/netflix.json",
+    r"src/mazes/CAT.json",
+    r"src/mazes/EF.json",
+    r"src/mazes/Polygon.json",
     r"src/mazes/geminimaze.json",
-    r"src/mazes/logo.json",
     r"src/mazes/chatgptmaze.json",
+    r"src/mazes/Minecraft.json",
+    r"src/mazes/Vision.json",
+    r"src/mazes/jack.json",
+    r"src/mazes/dragon.json",
+    r"src/mazes/Birb.json"
 ]
 current_maze_index = 0
 scores = {}
@@ -295,6 +308,7 @@ def run_commands():
 # --- UI ELEMENTS ---
 timer_label = tk.Label(frame_left, text="⏱ Time: 0.0s", font=("Consolas", 11, "bold"))
 timer_label.pack(pady=5)
+root.bind('<Control-Return>', lambda event: run_commands())
 
 score_label = tk.Label(frame_left, text="🏆 Score: —", font=("Consolas", 11, "bold"))
 score_label.pack(pady=5)

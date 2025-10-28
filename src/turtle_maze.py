@@ -5,7 +5,7 @@ import json
 import math
 import tkinter.messagebox as msg
 
-filename = r"src/mazes/contrib/chatgptmaze.json"
+filename = r"src/mazes/contrib/Minecraft.json"
 
 # --- Main Tkinter window ---
 root = tk.Tk()
@@ -20,7 +20,7 @@ frame_right.pack(side="right", padx=10, pady=10)
 
 # --- Turtle Canvas inside Tkinter ---
 canvas = turtle.ScrolledCanvas(frame_right, width=600, height=600)
-canvas.pack()
+canvas.pack(fill="both", expand=True)
 screen = turtle.TurtleScreen(canvas)
 screen.tracer(0)   # manual updates
 
@@ -180,6 +180,7 @@ def run_commands():
 
 run_button = tk.Button(frame_left, text="Run", command=run_commands)
 run_button.pack(pady=5)
+root.bind('<Control-Return>', lambda event: run_commands())
 
 def show_mouse_position(event):
     canvas_width = screen.window_width()
@@ -201,32 +202,31 @@ canvas.bind("<Motion>", show_mouse_position)
 #INSTRUCTION PANEL
 def show_instructions():
     instructions = """
-📘 **MAZE SOLVER INSTRUCTIONS**
+📘 **INSTRUCTIONS**
 
 Welcome to the Maze Solver challenge! 🧩  
-Your goal is to **navigate the blue turtle 🐢** from the **start point** to the **green goal 🟢**
+Your goal is to navigate the blue turtle 🐢from the start point to the green goal 🟢
 using text-based movement commands — without hitting any walls.
 
 ───────────────────────────────
 🧭 **COMMANDS**
 ───────────────────────────────
-➡️  MOVE <distance>  
-  Moves the turtle forward by the given number of pixels.
+➡️ MOVE <distance>  
+- Moves the turtle forward by the given number of pixels.
 
-↩️  ROTATE <angle>  
-  Rotates the turtle clockwise by the given number of degrees.
+↩️ TURN <angle>  
+- Rotates the turtle clockwise by the given number of degrees.
+- Rotates Anti Clockwise by using negative number of degrees.
 
 ───────────────────────────────
 💻 **EXAMPLES**
 ───────────────────────────────
-MOVE 100  
-ROTATE 90  
-MOVE 50  
-ROTATE 45  
-MOVE 70  
-
-Tip 🪄:  
-You can use multiple lines — one command per line!
+TURN 120
+MOVE 220
+TURN -120
+MOVE 240
+TURN 55
+MOVE 70 
 
 ───────────────────────────────
 🎯 **GOAL**
