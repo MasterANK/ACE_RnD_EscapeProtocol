@@ -9,7 +9,7 @@ maze_files = [
     r"src/mazes/Valo.json",
     r"src/mazes/netflix.json",
     r"src/mazes/CAT.json",
-    r"src/mazes/EF.json",
+    r"src/mazes/HarryPotter.json",
     r"src/mazes/Polygon.json",
     r"src/mazes/geminimaze.json",
     r"src/mazes/chatgptmaze.json",
@@ -19,7 +19,6 @@ maze_files = [
     r"src/mazes/dragon.json",
     r"src/mazes/Birb.json"
 ]
-
 for i in maze_files:
     with open(i, "r") as f:
         data = json.load(f)

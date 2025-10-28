@@ -19,7 +19,7 @@ maze_files = [
     r"src/mazes/Valo.json",
     r"src/mazes/netflix.json",
     r"src/mazes/CAT.json",
-    r"src/mazes/EF.json",
+    r"src/mazes/HarryPotter.json",
     r"src/mazes/Polygon.json",
     r"src/mazes/geminimaze.json",
     r"src/mazes/chatgptmaze.json",
