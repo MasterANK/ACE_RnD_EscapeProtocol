@@ -9,7 +9,7 @@ import tkinter.simpledialog as simpledialog
 PLAYER_USERNAME = ""
 # ------------------ CONFIG ------------------
 maze_files = [
-    r"src/mazes/ACE.json",
+    r"src/mazes/polygon.json",
 ]
 current_maze_index = 0
 scores = {}
