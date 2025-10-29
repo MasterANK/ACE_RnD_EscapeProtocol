@@ -87,12 +87,24 @@ def submit_score():
     # CORE LOGIC: Accumulate all four metrics securely on the server
     
     # 1. Score Accumulation (Relies on top-level 'score' for the correct increment)
-    user_data["total"] = user_data["total"] + score_float
-    
-    # 2. Metric Accumulation (Relies on top-level metrics for the correct increment)
-    user_data["total_moves"] = user_data.get("total_moves", 0) + moves_int
-    user_data["total_distance"] = user_data.get("total_distance", 0.0) + distance_float
-    user_data["total_time"] = user_data.get("total_time", 0.0) + time_float
+    # --- Safe Metric Update with Replay Adjustment ---
+    maze_name = list(maze_scores.keys())[0] if maze_scores else None
+    old_maze_data = user_data["mazes"].get(maze_name) if maze_name else None
+
+    if old_maze_data:
+        old_score, old_moves, old_distance, old_time = old_maze_data
+        # Subtract old stats before adding new ones
+        user_data["total"] -= old_score
+        user_data["total_moves"] -= old_moves
+        user_data["total_distance"] -= old_distance
+        user_data["total_time"] -= old_time
+
+    # Add new attempt
+    user_data["total"] += score_float
+    user_data["total_moves"] += moves_int
+    user_data["total_distance"] += distance_float
+    user_data["total_time"] += time_float
+
     
     # 3. Maze Completion Tracking (Stores the new detailed list structure, which is acceptable in Firestore)
     user_data["mazes"].update(maze_scores)

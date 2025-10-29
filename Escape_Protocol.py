@@ -103,6 +103,7 @@ def get_username():
             PLAYER_USERNAME = username.strip()
             # Update the UI element to show the player who they are
             status_label.config(text=f"Welcome, {PLAYER_USERNAME}!\nStatus: Ready")
+            PlayerName_Label.config(text=f"User: {PLAYER_USERNAME}")
         else:
             # Handle cancel or no input
             PLAYER_USERNAME = "Anonymous"
@@ -291,6 +292,18 @@ def run_commands():
                         else:
                             # not last one — go to next maze after a short pause
                             root.after(2000, load_next_maze)
+                            try:
+                                # Saves COMPLETED Maze Commands
+                                invalid_chars = [":", "/", "\\", "*", "?", "\"", "<", ">", "|"]
+                                safe_maze_name = maze_name
+                                for ch in invalid_chars:
+                                    safe_maze_name = safe_maze_name.replace(ch, "_")
+                                commands_path = f"maze_RESULT/{safe_maze_name}.txt"
+                                with open(commands_path, "w") as f:
+                                    f.write("\n".join(commands))
+                                print(f"✅ Commands saved to {commands_path}")
+                            except Exception as e:
+                                print(f"⚠️ Failed to save screenshot: {e}")
                         return
             except:
                 pass
@@ -324,6 +337,9 @@ run_button.pack(pady=5)
 
 status_label = tk.Label(frame_left, text="Status: Ready", justify="left", wraplength=250)
 status_label.pack()
+
+PlayerName_Label = tk.Label(frame_left, text="UserName:"+PLAYER_USERNAME, justify="left", wraplength=250)
+PlayerName_Label.pack()
 
 # --- INSTRUCTION PANEL ---
 def show_instructions():
