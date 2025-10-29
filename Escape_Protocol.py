@@ -251,7 +251,7 @@ def run_commands():
                         return
                     if player.distance(goal_pos) < 20:
                         elapsed = time.time() - start_time
-                        score = max(0, 1000 - (elapsed * 2 + move_count * 1 + total_distance * 0.1))
+                        score = max(100, 1000 - (elapsed * 0.8 + move_count * 3 + total_distance * 0.2))
                         scores[f"{maze_name}"] = score
                         print(scores)
                         set_border_color("green")
