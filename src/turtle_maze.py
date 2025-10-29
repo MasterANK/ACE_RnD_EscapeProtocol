@@ -5,7 +5,7 @@ import json
 import math
 import tkinter.messagebox as msg
 
-filename = r"src/mazes/contrib/Minecraft.json"
+filename = r"src/mazes/netflix.json"
 
 # --- Main Tkinter window ---
 root = tk.Tk()
