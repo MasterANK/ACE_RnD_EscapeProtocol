@@ -6,23 +6,23 @@ import requests
 import subprocess
 
 maze_files = [
-    r"src/mazes/MAZENF.json",
-    r"src/mazes/maze2.json",
-    r"src/mazes/ACE.json",
-    r"src/mazes/VIPS.json",
-    r"src/mazes/vscodelogo.json",
-    r"src/mazes/Valo.json",
-    r"src/mazes/netflix.json",
-    r"src/mazes/CAT.json",
-    r"src/mazes/HarryPotter.json",
-    r"src/mazes/Polygon.json",
-    r"src/mazes/geminimaze.json",
-    r"src/mazes/chatgptmaze.json",
-    r"src/mazes/Minecraft.json",
-    r"src/mazes/Vision.json",
-    r"src/mazes/jack.json",
-    r"src/mazes/dragon.json",
-    r"src/mazes/Birb.json"
+    r"mazes/MAZENF.json",
+    r"mazes/maze2.json",
+    r"mazes/ACE.json",
+    r"mazes/VIPS.json",
+    r"mazes/vscodelogo.json",
+    r"mazes/Valo.json",
+    r"mazes/netflix.json",
+    r"mazes/CAT.json",
+    r"mazes/HarryPotter.json",
+    r"mazes/Polygon.json",
+    r"mazes/geminimaze.json",
+    r"mazes/chatgptmaze.json",
+    r"mazes/Minecraft.json",
+    r"mazes/Vision.json",
+    r"mazes/jack.json",
+    r"mazes/dragon.json",
+    r"mazes/Birb.json"
 ]
 
 
