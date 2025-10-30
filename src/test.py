@@ -3,6 +3,7 @@ import importlib
 import json
 import os
 import requests
+import subprocess
 
 maze_files = [
     r"src/mazes/MAZENF.json",
@@ -24,6 +25,19 @@ maze_files = [
     r"src/mazes/Birb.json"
 ]
 
+
+def install_module(package_name):
+    """Install a missing Python package using pip."""
+    try:
+        print(f"⬇️ Installing missing package: {package_name}")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
+        print(f"✅ Successfully installed '{package_name}'.")
+        return True
+    except Exception as e:
+        print(f"❌ Failed to install '{package_name}': {e}")
+        return False
+
+
 def check_python_version():
     print("🧠 Checking Python version...")
     if sys.version_info < (3, 8):
@@ -32,15 +46,18 @@ def check_python_version():
     print(f"✅ Python {sys.version.split()[0]} is compatible.")
     return True
 
-def check_module(module_name):
+
+def check_module(module_name, package_name=None):
+    """Check if a module is available, auto-install if not."""
+    package_name = package_name or module_name
     try:
         importlib.import_module(module_name)
         print(f"✅ Module '{module_name}' found.")
         return True
     except ImportError:
-        print(f"❌ Module '{module_name}' is missing. Try installing it using:")
-        print(f"   pip install {module_name}")
-        return False
+        print(f"❌ Module '{module_name}' is missing.")
+        return install_module(package_name)
+
 
 def check_turtle_graphics():
     print("🎨 Testing turtle graphics window...")
@@ -57,6 +74,7 @@ def check_turtle_graphics():
         print(f"❌ Turtle graphics failed: {e}")
         return False
 
+
 def check_maze_files():
     print("🗂️ Checking for maze files...")
     found = False
@@ -68,23 +86,27 @@ def check_maze_files():
             found = True
         except json.JSONDecodeError:
             print(f"⚠️ {file} is not a valid JSON maze file.")
+        except FileNotFoundError:
+            print(f"⚠️ File not found: {file}")
         except Exception as e:
-            print(e)
+            print(f"⚠️ Error reading {file}: {e}")
     if not found:
         print("❌ No valid maze files found in the directory.")
     return found
 
-def check_api_connection(test_url="https://www.google.com", api_url="https://ace-rnd-escapeprotocol.onrender.com/leaderboard"):
+
+def check_api_connection(test_url="https://www.google.com",
+                         api_url="https://ace-rnd-escapeprotocol.onrender.com/leaderboard"):
     print("🌐 Checking internet and API connectivity...")
     try:
-        # Step 1: Check general internet access
+        # Step 1: General internet check
         r = requests.get(test_url, timeout=5)
         if r.status_code == 200:
             print("✅ Internet connection working.")
         else:
             print(f"⚠️ Internet access seems unstable (Status {r.status_code})")
 
-        # Step 2: If API URL is provided, check it as well
+        # Step 2: API connection
         if api_url:
             print(f"🔗 Checking API connection: {api_url}")
             api_resp = requests.get(api_url, timeout=10)
@@ -98,8 +120,13 @@ def check_api_connection(test_url="https://www.google.com", api_url="https://ace
         print(f"❌ Network/API check failed: {e}")
         return False
 
+
 def run_all_checks():
     print("🔍 Running Maze System Check...\n")
+
+    # Pre-check: Ensure pip itself is available
+    check_module("pip")
+
     checks = [
         check_python_version(),
         check_module("tkinter"),
@@ -110,11 +137,13 @@ def run_all_checks():
         check_maze_files(),
         check_api_connection(),
     ]
+
     print("\n📊 Summary:")
     if all(checks):
         print("✅ All systems operational! You’re ready to play.")
     else:
         print("⚠️ Some checks failed. Please fix the above issues before running the maze.")
+
 
 if __name__ == "__main__":
     run_all_checks()
