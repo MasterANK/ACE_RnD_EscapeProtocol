@@ -16,7 +16,6 @@ DEFAULT_API_BASE = "https://ace-rnd-escapeprotocol.onrender.com"
 
 
 def get_api_base():
-    """Optional override via .streamlit/secrets.toml -> API_BASE = "https://..." """
     try:
         return st.secrets.get("API_BASE", DEFAULT_API_BASE).rstrip("/")
     except Exception:
