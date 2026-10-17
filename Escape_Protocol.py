@@ -9,6 +9,7 @@ import requests
 
 API_URL = "https://ace-rnd-escapeprotocol.onrender.com/submit_score"
 PLAYER_USERNAME = ""
+SEASON_ID = "season_2"
 # ------------------ CONFIG ------------------
 maze_files = [
     r"src/mazes/MAZENF.json",
@@ -110,13 +111,15 @@ def get_username():
             status_label.config(text="Status: Ready (Anonymous Player)")
 
 # --- Send Users Score ---
-def send_score(username, score, maze_scores, moves, distance):
+def send_score(username, score, maze_scores, moves, distance, time_elapsed):
     data = {
         "username": username,
         "score": score,
         "maze_scores": maze_scores,
         "moves": moves,
         "distance": distance,
+        "time_elapsed": time_elapsed,
+        "Season": SEASON_ID,
     }
     response = requests.post(API_URL, json=data)
     print(response.json())
@@ -282,6 +285,7 @@ def run_commands():
                                 maze_scores={maze_name: [score,move_count,total_distance,elapsed]},
                                 moves=move_count,        # Pass the move count for this single maze
                                 distance=total_distance, # Pass the distance for this single maze
+                                time_elapsed=elapsed
                             )
                             status_label.config(
                                 text=f"{maze_name} Complete! Uploaded\n"
