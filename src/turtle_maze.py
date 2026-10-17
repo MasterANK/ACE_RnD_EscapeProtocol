@@ -9,13 +9,12 @@ import tkinter.simpledialog as simpledialog
 PLAYER_USERNAME = ""
 # ------------------ CONFIG ------------------
 maze_files = [
-    r"src/mazes/polygon.json",
+    r"src/mazes/Birb.json",
 ]
 current_maze_index = 0
 scores = {}
 timer_running = False
 start_time = 0
-
 # --------------------------------------------
 
 # --- Main Tkinter window ---
@@ -25,7 +24,6 @@ root.title("Escape Protocol")
 # Layout: left side controls, right side turtle canvas
 frame_left = tk.Frame(root)
 frame_left.pack(side="left", padx=10, pady=10)
-
 frame_right = tk.Frame(root)
 frame_right.pack(side="right", padx=10, pady=10)
 

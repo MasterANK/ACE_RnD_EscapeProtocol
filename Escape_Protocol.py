@@ -9,7 +9,7 @@ import requests
 
 API_URL = "https://ace-rnd-escapeprotocol.onrender.com/submit_score"
 PLAYER_USERNAME = ""
-SEASON_ID = "season_2"
+SEASON_ID = "season_0"
 # ------------------ CONFIG ------------------
 maze_files = [
     r"src/mazes/MAZENF.json",
@@ -119,7 +119,7 @@ def send_score(username, score, maze_scores, moves, distance, time_elapsed):
         "moves": moves,
         "distance": distance,
         "time_elapsed": time_elapsed,
-        "Season": SEASON_ID,
+        "season": SEASON_ID,
     }
     response = requests.post(API_URL, json=data)
     print(response.json())
