@@ -47,6 +47,9 @@ PROTECTED_SEASONS = {
 
 SEASON_ID_PATTERN = re.compile(r"[a-z0-9_]{1,40}")
 VALID_STATUSES = {"upcoming", "active", "completed"}
+# "competition" seasons are ranked and count toward champions / all-time.
+# "casual" seasons accept scores but never count toward the competition.
+VALID_TYPES = {"competition", "casual"}
 
 # =====================================================================
 #  Firestore layout
@@ -74,7 +77,10 @@ def get_current_season_id():
     """Newest active season (highest 'number'). None if no season is active."""
     best_id, best_num = None, -1
     for d in db.collection("seasons").where("status", "==", "active").stream():
-        num = (d.to_dict() or {}).get("number", 0)
+        sd = d.to_dict() or {}
+        if sd.get("type", "competition") == "casual":
+            continue
+        num = sd.get("number", 0)
         if num >= best_num:
             best_id, best_num = d.id, num
     return best_id
@@ -84,7 +90,10 @@ def get_latest_season_id():
     """Newest season of any status (display fallback between seasons)."""
     best_id, best_num = None, -1
     for d in db.collection("seasons").stream():
-        num = (d.to_dict() or {}).get("number", 0)
+        sd = d.to_dict() or {}
+        if sd.get("type", "competition") == "casual":
+            continue
+        num = sd.get("number", 0)
         if num >= best_num:
             best_id, best_num = d.id, num
     return best_id
@@ -99,7 +108,11 @@ def count_players(season_id):
 
 
 def next_season_number():
-    nums = [(d.to_dict() or {}).get("number", 0) for d in db.collection("seasons").stream()]
+    nums = []
+    for d in db.collection("seasons").stream():
+        sd = d.to_dict() or {}
+        if sd.get("type", "competition") != "casual":
+            nums.append(sd.get("number", 0))
     return max(nums + [0]) + 1
 
 
@@ -294,6 +307,7 @@ def seasons():
                 "name": sd.get("name", d.id),
                 "number": sd.get("number", 0),
                 "status": sd.get("status", "upcoming"),
+                "type": sd.get("type", "competition"),
             })
         items.sort(key=lambda s: (s["number"], s["id"]))
 
@@ -326,6 +340,8 @@ def leaderboard():
         if season_id == "all":
             totals = {}
             for s in db.collection("seasons").stream():
+                if (s.to_dict() or {}).get("type", "competition") == "casual":
+                    continue
                 for doc in season_lb(s.id).stream():
                     d = doc.to_dict() or {}
                     t = totals.setdefault(doc.id, {
@@ -393,6 +409,7 @@ def admin_list_seasons():
             "name": sd.get("name", d.id),
             "number": sd.get("number", 0),
             "status": sd.get("status", "upcoming"),
+            "type": sd.get("type", "competition"),
             "players": count_players(d.id),
             "protected": d.id in PROTECTED_SEASONS,
         })
@@ -429,19 +446,31 @@ def admin_season():
         except (ValueError, TypeError):
             return jsonify({"error": "number must be an integer."}), 400
 
+    season_type = d.get("type")
+    if season_type is not None and season_type not in VALID_TYPES:
+        return jsonify({"error": f"type must be one of {sorted(VALID_TYPES)}."}), 400
+    if season_type == "casual" and number is None:
+        number = 0
+
     if not sid:
-        if number is None:
-            number = next_season_number()
-        sid = f"season_{number}"
+        if season_type == "casual":
+            sid = "casual"
+        else:
+            if number is None:
+                number = next_season_number()
+            sid = f"season_{number}"
 
     if not valid_season_id(sid):
         return jsonify({"error": "Bad id (use a-z, 0-9, underscore; max 40 chars)."}), 400
 
     ref = db.collection("seasons").document(sid)
-    is_new = not ref.get().exists
+    snap = ref.get()
+    is_new = not snap.exists
+    existing_type = (snap.to_dict() or {}).get("type", "competition") if snap.exists else "competition"
+    effective_type = season_type or existing_type
 
     if is_new and number is None:
-        number = next_season_number()
+        number = 0 if effective_type == "casual" else next_season_number()
 
     fields = {}
     if number is not None:
@@ -451,7 +480,10 @@ def admin_season():
     if name:
         fields["name"] = name[:100]
     elif is_new:
-        fields["name"] = f"Season {number}"
+        fields["name"] = "Casual Play" if effective_type == "casual" else f"Season {number}"
+
+    if season_type is not None or is_new:
+        fields["type"] = effective_type
 
     if "status" in d:
         if d["status"] not in VALID_STATUSES:
@@ -464,9 +496,10 @@ def admin_season():
         return jsonify({"error": "Nothing to update."}), 400
 
     closed_others = []
-    if fields.get("status") == "active" and d.get("close_others"):
+    if fields.get("status") == "active" and d.get("close_others") and effective_type == "competition":
         for s in db.collection("seasons").where("status", "==", "active").stream():
-            if s.id != sid:
+            other_type = (s.to_dict() or {}).get("type", "competition")
+            if s.id != sid and other_type == "competition":
                 s.reference.set({"status": "completed"}, merge=True)
                 closed_others.append(s.id)
 
@@ -635,6 +668,10 @@ ADMIN_PAGE = r"""<!doctype html>
       <div class="row">
         <input id="newName" placeholder="Name (e.g. Season 3)" style="flex:1;min-width:200px">
         <input id="newNumber" type="number" min="0" placeholder="Number (auto)" style="width:140px">
+        <select id="newType">
+          <option value="competition">Competition season</option>
+          <option value="casual">Casual play (no competition)</option>
+        </select>
         <select id="newStatus">
           <option value="upcoming">Start as upcoming</option>
           <option value="active">Start live now</option>
@@ -704,7 +741,7 @@ ADMIN_PAGE = r"""<!doctype html>
     b += btn("export", "⬇ Export");
     b += btn("delete", "🗑 Delete", s.protected ? "disabled title='Protected season'" : "", "danger");
     return `<tr>
-      <td><b>${esc(s.name)}</b><div class="sub">${esc(s.id)} · #${esc(s.number)}${s.protected ? " · 🔒 protected" : ""}</div></td>
+      <td><b>${esc(s.name)}</b><div class="sub">${esc(s.id)} · ${s.type === "casual" ? "🎮 casual" : "#" + esc(s.number)}${s.protected ? " · 🔒 protected" : ""}</div></td>
       <td><span class="badge ${esc(s.status)}">${esc(label[s.status] || s.status)}</span></td>
       <td>${esc(s.players)}</td>
       <td><div class="actions">${b}</div></td>
@@ -783,6 +820,7 @@ ADMIN_PAGE = r"""<!doctype html>
     if ($("newName").value.trim()) body.name = $("newName").value.trim();
     if ($("newNumber").value !== "") body.number = parseInt($("newNumber").value, 10);
     body.status = $("newStatus").value;
+    body.type = $("newType").value;
     if (body.status === "active" && !confirm("Start this season live right away?")) return;
     if (body.status === "active") body.close_others = $("closeOthers").checked;
     const res = await api("/admin/season", { method: "POST", body: JSON.stringify(body) });
